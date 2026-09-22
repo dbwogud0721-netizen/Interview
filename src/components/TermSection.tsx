@@ -62,23 +62,35 @@ interface Props {
   onReorder: (from: number, to: number) => void
   memo: string
   onMemoChange: (value: string) => void
+  printing?: boolean
 }
 
-export default function TermSection({ items, onPatch, onRemove, onAdd, onReorder, memo, onMemoChange }: Props) {
+export default function TermSection({
+  items,
+  onPatch,
+  onRemove,
+  onAdd,
+  onReorder,
+  memo,
+  onMemoChange,
+  printing,
+}: Props) {
   const [query, setQuery] = useState('')
   const [activeTab, setActiveTab] = useState<TermCategory>(TERM_CATEGORIES[0])
   const { handleProps, itemProps } = useDragReorder(onReorder)
 
+  // 인쇄 중에는 검색어와 선택된 카테고리를 무시하고 모든 단어를 카테고리별로 내보낸다.
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
     return items
       .map((item, index) => ({ item, index }))
       .filter(({ item }) => {
+        if (printing) return true
         if (item.category !== activeTab) return false
         if (!q) return true
         return item.term.toLowerCase().includes(q) || item.description.toLowerCase().includes(q)
       })
-  }, [items, query, activeTab])
+  }, [items, query, activeTab, printing])
 
   const counts = useMemo(() => {
     const map = new Map<string, number>()
@@ -126,19 +138,43 @@ export default function TermSection({ items, onPatch, onRemove, onAdd, onReorder
         ))}
       </div>
 
-      <div className="term-grid" role="tabpanel">
-        {visible.map(({ item, index }) => (
-          <TermCard
-            key={item.id}
-            item={item}
-            onPatch={onPatch}
-            onRemove={onRemove}
-            dragProps={itemProps(index)}
-            handleProps={handleProps(index, items.length)}
-          />
-        ))}
-      </div>
-      {visible.length === 0 ? (
+      {printing ? (
+        TERM_CATEGORIES.map((cat) => {
+          const group = visible.filter(({ item }) => item.category === cat)
+          if (group.length === 0) return null
+          return (
+            <div key={cat} className="term-print-group">
+              <h3 className="term-print-heading">{cat}</h3>
+              <div className="term-grid">
+                {group.map(({ item, index }) => (
+                  <TermCard
+                    key={item.id}
+                    item={item}
+                    onPatch={onPatch}
+                    onRemove={onRemove}
+                    dragProps={itemProps(index)}
+                    handleProps={handleProps(index, items.length)}
+                  />
+                ))}
+              </div>
+            </div>
+          )
+        })
+      ) : (
+        <div className="term-grid" role="tabpanel">
+          {visible.map(({ item, index }) => (
+            <TermCard
+              key={item.id}
+              item={item}
+              onPatch={onPatch}
+              onRemove={onRemove}
+              dragProps={itemProps(index)}
+              handleProps={handleProps(index, items.length)}
+            />
+          ))}
+        </div>
+      )}
+      {!printing && visible.length === 0 ? (
         <p className="empty">
           {counts.get(activeTab) ? '검색 조건에 맞는 단어가 없습니다.' : `"${activeTab}"에 아직 단어가 없습니다. 아래에서 추가해보세요.`}
         </p>

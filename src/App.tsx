@@ -21,6 +21,8 @@ export default function App() {
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [focusKey, setFocusKey] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<MainTabKey>('intro')
+  /** 인쇄(PDF 저장) 중에는 선택된 탭만이 아니라 세 탭을 모두 펼쳐서 렌더한다. */
+  const [printing, setPrinting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const firstRender = useRef(true)
 
@@ -42,6 +44,29 @@ export default function App() {
     }, 400)
     return () => window.clearTimeout(timer)
   }, [data])
+
+  // PDF 저장은 브라우저 인쇄 기능을 쓴다. 별도 라이브러리 없이 한글 폰트가 그대로 나온다.
+  // 세 탭이 모두 DOM에 올라오고 textarea 높이 계산이 끝난 다음 프레임에 인쇄 창을 연다.
+  useEffect(() => {
+    if (!printing) return
+
+    const originalTitle = document.title
+    // 크롬은 document.title을 PDF 기본 파일명으로 쓴다.
+    document.title = `면접노트-${data.date || 'export'}`
+
+    const finish = () => setPrinting(false)
+    window.addEventListener('afterprint', finish)
+
+    const frame = window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => window.print())
+    })
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('afterprint', finish)
+      document.title = originalTitle
+    }
+  }, [printing, data.date])
 
   // 새로 만든 입력칸으로 포커스와 스크롤을 옮긴다. 렌더가 끝난 뒤에 DOM에서 찾는다.
   useEffect(() => {
@@ -138,17 +163,7 @@ export default function App() {
     window.history.back()
   }, [])
 
-  const exportJson = useCallback(() => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `interview-note-${data.date || 'export'}.json`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
-  }, [data])
+  const exportPdf = useCallback(() => setPrinting(true), [])
 
   const importJson = useCallback((file: File) => {
     const reader = new FileReader()
@@ -199,9 +214,9 @@ export default function App() {
                 <span className="save-dot" />
                 {saveState === 'saving' ? '저장 중...' : saveState === 'saved' ? '저장됨' : '자동 저장'}
               </span>
-              <button type="button" className="ghost-btn" onClick={exportJson}>
+              <button type="button" className="ghost-btn" onClick={exportPdf}>
                 <Download />
-                <span>JSON 내보내기</span>
+                <span>PDF 내보내기</span>
               </button>
               <button type="button" className="ghost-btn" onClick={() => fileInputRef.current?.click()}>
                 <Upload />
@@ -245,7 +260,7 @@ export default function App() {
         </nav>
 
         <main className="stack">
-          {activeTab === 'intro' ? (
+          {printing || activeTab === 'intro' ? (
             <IntroSection
               items={data.intro}
               onPatch={patchIntro}
@@ -256,7 +271,7 @@ export default function App() {
             />
           ) : null}
 
-          {activeTab === 'questions' ? (
+          {printing || activeTab === 'questions' ? (
             <QuestionSection
               items={data.questions}
               onPatch={patchQuestion}
@@ -266,10 +281,11 @@ export default function App() {
               onToggleAll={toggleAllQuestions}
               memo={data.questionsMemo}
               onMemoChange={setQuestionsMemo}
+              printing={printing}
             />
           ) : null}
 
-          {activeTab === 'terms' ? (
+          {printing || activeTab === 'terms' ? (
             <TermSection
               items={data.terms}
               onPatch={patchTerm}
@@ -278,6 +294,7 @@ export default function App() {
               onReorder={reorderTerms}
               memo={data.vocabularyMemo}
               onMemoChange={setVocabularyMemo}
+              printing={printing}
             />
           ) : null}
         </main>

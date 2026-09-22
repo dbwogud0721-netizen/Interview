@@ -1082,3 +1082,121 @@ button {
     scroll-behavior: auto !important;
   }
 }
+
+/* =========================================================
+   인쇄 / PDF 저장
+   브라우저 인쇄 기능을 그대로 쓴다. 별도 PDF 라이브러리가 없으므로
+   한글 폰트가 깨지지 않고, 자동 확장된 textarea 높이가 그대로 종이에 옮겨진다.
+   ========================================================= */
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+
+  :root {
+    --canvas: #ffffff;
+  }
+
+  body {
+    background: #fff;
+    font-size: 11pt;
+  }
+
+  /* 배경색/테두리를 인쇄에서도 살린다 */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    padding: 0;
+  }
+
+  .shell {
+    max-width: none;
+  }
+
+  /* 조작용 UI는 종이에 필요 없다 */
+  .back-btn,
+  .toolbar,
+  .main-tabs,
+  .tab-row,
+  .term-toolbar,
+  .add-btn,
+  .delete-btn,
+  .icon-btn,
+  .drag-handle,
+  .ghost-btn,
+  .char-count,
+  .mini-note,
+  .empty {
+    display: none !important;
+  }
+
+  .page-head {
+    box-shadow: none;
+    border-color: var(--line);
+    padding: 0 0 12px;
+    border: none;
+    border-bottom: 2px solid var(--line);
+    border-radius: 0;
+    margin-bottom: 16px;
+  }
+
+  .section {
+    box-shadow: none;
+    border-radius: 0;
+    border: none;
+    border-top: 2px solid var(--line);
+    padding: 0;
+    padding-top: 14px;
+    margin-bottom: 18px;
+  }
+
+  /* 카드/항목이 페이지 경계에서 잘리지 않게 한다 */
+  .card,
+  .intro-row,
+  .memo-note,
+  .term-print-group {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .section-head {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* 입력칸은 인쇄에서 "적어둔 내용"으로 보이면 된다 */
+  .auto-textarea,
+  .text-input,
+  .select {
+    border-color: #d8d5cf !important;
+    background: #fff !important;
+    color: #000;
+  }
+
+  .memo-textarea {
+    border-color: #d8d5cf !important;
+  }
+
+  /* 화면에선 2단, 종이에선 읽기 흐름대로 1단 */
+  .intro-grid,
+  .q-subgrid,
+  .term-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+.term-print-group {
+  margin-bottom: 14px;
+}
+
+.term-print-heading {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green-ink);
+}

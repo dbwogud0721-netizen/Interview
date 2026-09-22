@@ -13,6 +13,8 @@ interface CardProps {
   onRemove: (id: string) => void
   dragProps: Record<string, unknown>
   handleProps: Record<string, unknown>
+  /** 인쇄 중에는 접힌 카드도 펼쳐야 답변이 PDF에 들어간다. */
+  forceExpanded?: boolean
 }
 
 const QuestionCard = memo(function QuestionCard({
@@ -22,9 +24,11 @@ const QuestionCard = memo(function QuestionCard({
   onRemove,
   dragProps,
   handleProps,
+  forceExpanded,
 }: CardProps) {
   const bodyId = `q-body-${item.id}`
   const answered = item.answer.trim().length
+  const collapsed = item.collapsed && !forceExpanded
 
   return (
     <article className="card q-card" {...dragProps}>
@@ -43,16 +47,16 @@ const QuestionCard = memo(function QuestionCard({
           />
         </div>
         <div className="q-actions">
-          {item.collapsed && answered > 0 ? <span className="mini-note">답변 {answered}자</span> : null}
+          {collapsed && answered > 0 ? <span className="mini-note">답변 {answered}자</span> : null}
           <button
             type="button"
             className="icon-btn"
-            aria-expanded={!item.collapsed}
+            aria-expanded={!collapsed}
             aria-controls={bodyId}
-            title={item.collapsed ? '펼치기' : '접기'}
+            title={collapsed ? '펼치기' : '접기'}
             onClick={() => onPatch(item.id, { collapsed: !item.collapsed })}
           >
-            <span className={item.collapsed ? 'chev' : 'chev chev-open'}>
+            <span className={collapsed ? 'chev' : 'chev chev-open'}>
               <Chevron />
             </span>
           </button>
@@ -60,7 +64,7 @@ const QuestionCard = memo(function QuestionCard({
         </div>
       </div>
 
-      {item.collapsed ? null : (
+      {collapsed ? null : (
         <div className="q-body" id={bodyId}>
           <Field label="내 답변" hint={`${item.answer.length}자`}>
             <AutoTextarea
@@ -104,6 +108,7 @@ interface Props {
   onToggleAll: (collapsed: boolean) => void
   memo: string
   onMemoChange: (value: string) => void
+  printing?: boolean
 }
 
 export default function QuestionSection({
@@ -115,6 +120,7 @@ export default function QuestionSection({
   onToggleAll,
   memo,
   onMemoChange,
+  printing,
 }: Props) {
   const { handleProps, itemProps } = useDragReorder(onReorder)
   const allCollapsed = items.length > 0 && items.every((q) => q.collapsed)
@@ -147,6 +153,7 @@ export default function QuestionSection({
             onRemove={onRemove}
             dragProps={itemProps(index)}
             handleProps={handleProps(index, items.length)}
+            forceExpanded={printing}
           />
         ))}
         {items.length === 0 ? <p className="empty">아직 질문이 없습니다. 아래에서 추가해보세요.</p> : null}
