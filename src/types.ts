@@ -1,12 +1,11 @@
 export const TERM_CATEGORIES = ['기본 용어', '직무 관련 용어', '기타'] as const
 export type TermCategory = (typeof TERM_CATEGORIES)[number]
 
-/** 1분 자기소개의 한 구성 요소. fixed 항목은 삭제되지 않는 기본 항목. */
+/** 1분 자기소개의 한 구성 요소. 제목과 내용 모두 사용자가 직접 정한다. */
 export interface IntroItem {
   id: string
   label: string
   value: string
-  fixed: boolean
 }
 
 export interface QuestionItem {

@@ -607,12 +607,6 @@ button {
   margin-bottom: 8px;
 }
 
-.intro-label-fixed {
-  margin: 0;
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
 .intro-label-input {
   flex: 1 1 auto;
   min-width: 0;

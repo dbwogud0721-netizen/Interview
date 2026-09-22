@@ -23,13 +23,15 @@ export function emptyTerm(category: TermCategory = '기본 용어'): TermItem {
   return { id: uid('t'), term: '', description: '', category }
 }
 
-const DEFAULT_INTRO_LABELS = ['도입', '핵심 경험 및 역량', '지원 동기', '포부 및 마무리']
+export function emptyIntro(): IntroItem {
+  return { id: uid('intro'), label: '', value: '' }
+}
 
 export function createInitialData(): InterviewData {
   return {
     version: 2,
     date: today(),
-    intro: DEFAULT_INTRO_LABELS.map((label) => ({ id: uid('intro'), label, value: '', fixed: true })),
+    intro: [emptyIntro()],
     introMemo: '',
     questions: [emptyQuestion(), emptyQuestion(), emptyQuestion()],
     questionsMemo: '',
@@ -55,13 +57,12 @@ export function normalize(raw: unknown): InterviewData {
   const o = raw as Record<string, unknown>
 
   const intro: IntroItem[] = Array.isArray(o.intro)
-    ? o.intro.map((item, i) => {
+    ? o.intro.map((item) => {
         const r = (item ?? {}) as Record<string, unknown>
         return {
           id: str(r.id) || uid('intro'),
-          label: str(r.label, DEFAULT_INTRO_LABELS[i] ?? '항목'),
+          label: str(r.label),
           value: str(r.value),
-          fixed: bool(r.fixed, i < DEFAULT_INTRO_LABELS.length),
         }
       })
     : base.intro
@@ -95,7 +96,7 @@ export function normalize(raw: unknown): InterviewData {
   return {
     version: 2,
     date: str(o.date, base.date),
-    intro: intro.length ? intro : base.intro,
+    intro,
     introMemo: str(o.introMemo),
     questions,
     questionsMemo: str(o.questionsMemo),

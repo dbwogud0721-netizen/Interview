@@ -29,19 +29,15 @@ const IntroRow = memo(function IntroRow({ item, onPatch, onRemove }: RowProps) {
   return (
     <div className="intro-row">
       <div className="intro-row-head">
-        {item.fixed ? (
-          <span className="field-label intro-label-fixed">{item.label}</span>
-        ) : (
-          <input
-            className="text-input intro-label-input"
-            value={item.label}
-            placeholder="항목 제목 (예: 협업 경험)"
-            aria-label="항목 제목"
-            data-focus-key={`intro-label-${item.id}`}
-            onChange={(e) => onPatch(item.id, { label: e.target.value })}
-          />
-        )}
-        {item.fixed ? null : <DeleteButton onClick={() => onRemove(item.id)} />}
+        <input
+          className="text-input intro-label-input"
+          value={item.label}
+          placeholder="항목 제목 (예: 도입 / 핵심 경험 / 지원 동기)"
+          aria-label="항목 제목"
+          data-focus-key={`intro-label-${item.id}`}
+          onChange={(e) => onPatch(item.id, { label: e.target.value })}
+        />
+        <DeleteButton onClick={() => onRemove(item.id)} />
       </div>
       <AutoTextarea
         value={item.value}
@@ -71,7 +67,7 @@ export default function IntroSection({ items, onPatch, onRemove, onAdd, memo, on
       id="intro"
       index="01"
       title="1분 자기소개"
-      subtitle="말하듯이 적어두면 실제 면접에서 훨씬 편해집니다."
+      subtitle="항목을 직접 추가해서 원하는 순서로 구성하세요."
       tone="blue"
       aside={
         <span className="pill pill-blue" aria-live="polite">
@@ -84,6 +80,9 @@ export default function IntroSection({ items, onPatch, onRemove, onAdd, memo, on
           <IntroRow key={item.id} item={item} onPatch={onPatch} onRemove={onRemove} />
         ))}
       </div>
+      {items.length === 0 ? (
+        <p className="empty">아직 항목이 없습니다. 아래에서 추가해보세요.</p>
+      ) : null}
       <AddButton label="항목 추가" onClick={onAdd} />
 
       <MemoNote

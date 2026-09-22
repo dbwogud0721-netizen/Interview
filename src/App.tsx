@@ -4,7 +4,7 @@ import QuestionSection from './components/QuestionSection'
 import TermSection from './components/TermSection'
 import { ArrowLeft, Download, Trash, Upload } from './components/Icons'
 import { moveItem } from './hooks/useDragReorder'
-import { createInitialData, emptyQuestion, emptyTerm, loadData, normalize, saveData, uid } from './storage'
+import { createInitialData, emptyIntro, emptyQuestion, emptyTerm, loadData, normalize, saveData } from './storage'
 import type { InterviewData, IntroItem, QuestionItem, TermCategory, TermItem } from './types'
 
 type SaveState = 'idle' | 'saving' | 'saved'
@@ -89,7 +89,7 @@ export default function App() {
   }, [])
 
   const addIntro = useCallback(() => {
-    const item: IntroItem = { id: uid('intro'), label: '', value: '', fixed: false }
+    const item = emptyIntro()
     setData((d) => ({ ...d, intro: [...d.intro, item] }))
     setFocusKey(`intro-label-${item.id}`)
   }, [])
