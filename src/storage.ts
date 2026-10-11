@@ -1,4 +1,4 @@
-import type { InterviewData, IntroItem, QuestionItem, TermCategory, TermItem } from './types'
+import type { FollowUpItem, InterviewData, IntroItem, QuestionItem, TermCategory, TermItem } from './types'
 import { TERM_CATEGORIES } from './types'
 
 export const STORAGE_KEY = 'interview-note:v1'
@@ -15,8 +15,12 @@ function today(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
+export function emptyFollowUp(): FollowUpItem {
+  return { id: uid('fu'), text: '' }
+}
+
 export function emptyQuestion(): QuestionItem {
-  return { id: uid('q'), question: '', answer: '', followUp: '', memo: '', collapsed: false }
+  return { id: uid('q'), question: '', answer: '', followUps: [emptyFollowUp()], collapsed: false }
 }
 
 export function emptyTerm(category: TermCategory = '기본 용어'): TermItem {
@@ -42,6 +46,18 @@ export function createInitialData(): InterviewData {
 
 const str = (v: unknown, fallback = ''): string => (typeof v === 'string' ? v : fallback)
 const bool = (v: unknown, fallback = false): boolean => (typeof v === 'boolean' ? v : fallback)
+
+/** 꼬리 질문이 하나뿐인 문자열(followUp)로 저장돼 있던 예전 데이터도 그대로 살린다. */
+function normalizeFollowUps(r: Record<string, unknown>): FollowUpItem[] {
+  if (Array.isArray(r.followUps)) {
+    return r.followUps.map((f) => {
+      const o = (f ?? {}) as Record<string, unknown>
+      return { id: str(o.id) || uid('fu'), text: str(o.text) }
+    })
+  }
+  const legacy = str(r.followUp)
+  return [{ id: uid('fu'), text: legacy }]
+}
 
 function asCategory(v: unknown): TermCategory {
   return TERM_CATEGORIES.includes(v as TermCategory) ? (v as TermCategory) : '기본 용어'
@@ -74,8 +90,7 @@ export function normalize(raw: unknown): InterviewData {
           id: str(r.id) || uid('q'),
           question: str(r.question),
           answer: str(r.answer),
-          followUp: str(r.followUp),
-          memo: str(r.memo),
+          followUps: normalizeFollowUps(r),
           collapsed: bool(r.collapsed),
         }
       })

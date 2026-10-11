@@ -8,12 +8,17 @@ export interface IntroItem {
   value: string
 }
 
+export interface FollowUpItem {
+  id: string
+  text: string
+}
+
 export interface QuestionItem {
   id: string
   question: string
   answer: string
-  followUp: string
-  memo: string
+  /** 꼬리 질문은 개수 제한 없이 계속 붙일 수 있다. */
+  followUps: FollowUpItem[]
   /** 아코디언 접힘 상태. 접혀도 DOM에서 제거만 할 뿐 내용은 보존된다. */
   collapsed: boolean
 }

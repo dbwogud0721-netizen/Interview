@@ -11,6 +11,7 @@ interface CardProps {
   index: number
   onPatch: (id: string, patch: Partial<QuestionItem>) => void
   onRemove: (id: string) => void
+  onAddFollowUp: (questionId: string) => void
   dragProps: Record<string, unknown>
   handleProps: Record<string, unknown>
   /** 인쇄 중에는 접힌 카드도 펼쳐야 답변이 PDF에 들어간다. */
@@ -22,6 +23,7 @@ const QuestionCard = memo(function QuestionCard({
   index,
   onPatch,
   onRemove,
+  onAddFollowUp,
   dragProps,
   handleProps,
   forceExpanded,
@@ -75,23 +77,42 @@ const QuestionCard = memo(function QuestionCard({
               onChange={(answer) => onPatch(item.id, { answer })}
             />
           </Field>
-          <div className="q-subgrid">
-            <Field label="꼬리 질문">
-              <AutoTextarea
-                value={item.followUp}
-                ariaLabel="꼬리 질문"
-                placeholder="이어서 나올 만한 질문은?"
-                onChange={(followUp) => onPatch(item.id, { followUp })}
-              />
-            </Field>
-            <Field label="메모">
-              <AutoTextarea
-                value={item.memo}
-                ariaLabel="메모"
-                placeholder="말투, 표정, 보완할 점 등"
-                onChange={(memo) => onPatch(item.id, { memo })}
-              />
-            </Field>
+          <div className="followup-block">
+            <span className="field-label">
+              꼬리 질문
+              {item.followUps.length > 1 ? (
+                <span className="field-hint">{item.followUps.length}개</span>
+              ) : null}
+            </span>
+
+            <div className="followup-list">
+              {item.followUps.map((fu, i) => (
+                <div className="followup-row" key={fu.id}>
+                  <span className="followup-index">{i + 1}</span>
+                  <div className="followup-input-wrap">
+                    <AutoTextarea
+                      minRows={1}
+                      value={fu.text}
+                      ariaLabel={`꼬리 질문 ${i + 1}`}
+                      placeholder="이어서 나올 만한 질문은?"
+                      focusKey={`followup-${fu.id}`}
+                      onChange={(text) =>
+                        onPatch(item.id, {
+                          followUps: item.followUps.map((f) => (f.id === fu.id ? { ...f, text } : f)),
+                        })
+                      }
+                    />
+                  </div>
+                  <DeleteButton
+                    onClick={() =>
+                      onPatch(item.id, { followUps: item.followUps.filter((f) => f.id !== fu.id) })
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+
+            <AddButton label="꼬리 질문 추가" onClick={() => onAddFollowUp(item.id)} />
           </div>
         </div>
       )}
@@ -104,6 +125,7 @@ interface Props {
   onPatch: (id: string, patch: Partial<QuestionItem>) => void
   onRemove: (id: string) => void
   onAdd: () => void
+  onAddFollowUp: (questionId: string) => void
   onReorder: (from: number, to: number) => void
   onToggleAll: (collapsed: boolean) => void
   memo: string
@@ -116,6 +138,7 @@ export default function QuestionSection({
   onPatch,
   onRemove,
   onAdd,
+  onAddFollowUp,
   onReorder,
   onToggleAll,
   memo,
@@ -151,6 +174,7 @@ export default function QuestionSection({
             index={index}
             onPatch={onPatch}
             onRemove={onRemove}
+            onAddFollowUp={onAddFollowUp}
             dragProps={itemProps(index)}
             handleProps={handleProps(index, items.length)}
             forceExpanded={printing}

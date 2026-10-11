@@ -696,16 +696,55 @@ button {
   border-top: 1px dashed var(--line);
 }
 
-.q-subgrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 12px;
+/* ---------- 꼬리 질문 ---------- */
+
+.followup-block {
+  min-width: 0;
 }
 
-@media (min-width: 760px) {
-  .q-subgrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.followup-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.followup-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.followup-index {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 9px;
+  border-radius: 50%;
+  background: var(--beige-bg);
+  border: 1px solid var(--beige-line);
+  color: var(--beige-ink);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.followup-input-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.followup-row .delete-btn {
+  margin-top: 8px;
+}
+
+/* 꼬리 질문 추가 버튼은 카드 안에 들어가므로 바깥 추가 버튼보다 작게 */
+.followup-block .add-btn {
+  margin-top: 10px;
+  padding: 7px 13px;
+  font-size: 12.5px;
 }
 
 /* ---------- 단어장 ---------- */
@@ -1178,7 +1217,6 @@ button {
 
   /* 화면에선 2단, 종이에선 읽기 흐름대로 1단 */
   .intro-grid,
-  .q-subgrid,
   .term-grid {
     grid-template-columns: minmax(0, 1fr) !important;
   }

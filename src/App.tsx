@@ -4,7 +4,16 @@ import QuestionSection from './components/QuestionSection'
 import TermSection from './components/TermSection'
 import { ArrowLeft, Download, Trash, Upload } from './components/Icons'
 import { moveItem } from './hooks/useDragReorder'
-import { createInitialData, emptyIntro, emptyQuestion, emptyTerm, loadData, normalize, saveData } from './storage'
+import {
+  createInitialData,
+  emptyFollowUp,
+  emptyIntro,
+  emptyQuestion,
+  emptyTerm,
+  loadData,
+  normalize,
+  saveData,
+} from './storage'
 import type { InterviewData, IntroItem, QuestionItem, TermCategory, TermItem } from './types'
 
 type SaveState = 'idle' | 'saving' | 'saved'
@@ -111,6 +120,17 @@ export default function App() {
     const item = emptyQuestion()
     setData((d) => ({ ...d, questions: [...d.questions, item] }))
     setFocusKey(`question-${item.id}`)
+  }, [])
+
+  const addFollowUp = useCallback((questionId: string) => {
+    const followUp = emptyFollowUp()
+    setData((d) => ({
+      ...d,
+      questions: d.questions.map((q) =>
+        q.id === questionId ? { ...q, followUps: [...q.followUps, followUp] } : q,
+      ),
+    }))
+    setFocusKey(`followup-${followUp.id}`)
   }, [])
 
   const reorderQuestions = useCallback((from: number, to: number) => {
@@ -277,6 +297,7 @@ export default function App() {
               onPatch={patchQuestion}
               onRemove={removeQuestion}
               onAdd={addQuestion}
+              onAddFollowUp={addFollowUp}
               onReorder={reorderQuestions}
               onToggleAll={toggleAllQuestions}
               memo={data.questionsMemo}
