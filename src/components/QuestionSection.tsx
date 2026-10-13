@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import AutoTextarea from './AutoTextarea'
+import FeedbackBox from './FeedbackBox'
 import MemoNote from './MemoNote'
 import { Chevron } from './Icons'
 import { AddButton, DeleteButton, DragHandle, Field, Section } from './ui'
@@ -50,6 +51,7 @@ const QuestionCard = memo(function QuestionCard({
         </div>
         <div className="q-actions">
           {collapsed && answered > 0 ? <span className="mini-note">답변 {answered}자</span> : null}
+          {collapsed && item.feedback.trim() ? <span className="mini-note mini-note-pen">첨삭 있음</span> : null}
           <button
             type="button"
             className="icon-btn"
@@ -77,6 +79,11 @@ const QuestionCard = memo(function QuestionCard({
               onChange={(answer) => onPatch(item.id, { answer })}
             />
           </Field>
+          <FeedbackBox
+            value={item.feedback}
+            target={`질문 ${index + 1} 답변`}
+            onChange={(feedback) => onPatch(item.id, { feedback })}
+          />
           <div className="followup-block">
             <span className="field-label">
               꼬리 질문

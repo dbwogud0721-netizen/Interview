@@ -1,5 +1,6 @@
 import { memo, useMemo, useState } from 'react'
 import AutoTextarea from './AutoTextarea'
+import FeedbackBox from './FeedbackBox'
 import MemoNote from './MemoNote'
 import { Search } from './Icons'
 import { AddButton, DeleteButton, DragHandle, Field, Section } from './ui'
@@ -50,6 +51,11 @@ const TermCard = memo(function TermCard({ item, onPatch, onRemove, dragProps, ha
           onChange={(description) => onPatch(item.id, { description })}
         />
       </Field>
+      <FeedbackBox
+        value={item.feedback}
+        target={item.term || '용어'}
+        onChange={(feedback) => onPatch(item.id, { feedback })}
+      />
     </article>
   )
 })

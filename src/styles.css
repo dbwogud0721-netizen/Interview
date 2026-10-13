@@ -30,6 +30,10 @@
 
   --danger: #c0736c;
 
+  --pen-bg: #fdf4f2;
+  --pen-line: #f0d6d1;
+  --pen-ink: #b4574c;
+
   --r-lg: 18px;
   --r-md: 14px;
   --r-sm: 10px;
@@ -259,6 +263,73 @@ button {
 
 .save-saved .save-dot {
   background: var(--green-ink);
+}
+
+.save-offline,
+.save-local {
+  border-color: var(--pen-line);
+  background: var(--pen-bg);
+  color: var(--pen-ink);
+}
+
+.save-offline .save-dot,
+.save-local .save-dot {
+  background: var(--pen-ink);
+}
+
+/* ---------- 첨삭 ---------- */
+
+.feedback-box {
+  margin-top: 10px;
+  padding: 8px 10px 10px;
+  border: 1px dashed var(--pen-line);
+  border-radius: var(--r-md);
+  background: var(--pen-bg);
+  min-width: 0;
+}
+
+.feedback-empty {
+  background: transparent;
+}
+
+.feedback-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pen-ink);
+}
+
+.feedback-box .feedback-textarea {
+  padding: 6px 8px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--pen-ink);
+  font-size: 14px;
+}
+
+.feedback-box .feedback-textarea:focus {
+  border-color: var(--pen-line);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(180, 87, 76, 0.08);
+}
+
+.feedback-box .feedback-textarea::placeholder {
+  color: #d3aaa4;
+}
+
+.mini-note.mini-note-pen {
+  padding: 1px 8px;
+  border: 1px solid var(--pen-line);
+  border-radius: 999px;
+  background: var(--pen-bg);
+  color: var(--pen-ink);
+}
+
+.q-body .feedback-box {
+  margin-top: 0;
 }
 
 /* ---------- 섹션 카드 ---------- */
@@ -1164,8 +1235,20 @@ button {
   .ghost-btn,
   .char-count,
   .mini-note,
+  .feedback-empty,
   .empty {
     display: none !important;
+  }
+
+  .feedback-box {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .feedback-box .feedback-textarea {
+    border-color: transparent !important;
+    background: transparent !important;
+    color: var(--pen-ink);
   }
 
   .page-head {

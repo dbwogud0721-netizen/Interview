@@ -20,15 +20,15 @@ export function emptyFollowUp(): FollowUpItem {
 }
 
 export function emptyQuestion(): QuestionItem {
-  return { id: uid('q'), question: '', answer: '', followUps: [emptyFollowUp()], collapsed: false }
+  return { id: uid('q'), question: '', answer: '', followUps: [emptyFollowUp()], collapsed: false, feedback: '' }
 }
 
 export function emptyTerm(category: TermCategory = '기본 용어'): TermItem {
-  return { id: uid('t'), term: '', description: '', category }
+  return { id: uid('t'), term: '', description: '', category, feedback: '' }
 }
 
 export function emptyIntro(): IntroItem {
-  return { id: uid('intro'), label: '', value: '' }
+  return { id: uid('intro'), label: '', value: '', feedback: '' }
 }
 
 export function createInitialData(): InterviewData {
@@ -79,6 +79,7 @@ export function normalize(raw: unknown): InterviewData {
           id: str(r.id) || uid('intro'),
           label: str(r.label),
           value: str(r.value),
+          feedback: str(r.feedback),
         }
       })
     : base.intro
@@ -92,6 +93,7 @@ export function normalize(raw: unknown): InterviewData {
           answer: str(r.answer),
           followUps: normalizeFollowUps(r),
           collapsed: bool(r.collapsed),
+          feedback: str(r.feedback),
         }
       })
     : base.questions
@@ -104,6 +106,7 @@ export function normalize(raw: unknown): InterviewData {
           term: str(r.term),
           description: str(r.description),
           category: asCategory(r.category),
+          feedback: str(r.feedback),
         }
       })
     : base.terms
@@ -120,6 +123,7 @@ export function normalize(raw: unknown): InterviewData {
   }
 }
 
+/** 서버 동기화 전에 화면을 바로 띄우기 위한 로컬 사본. 서버가 없을 때는 이것만 쓴다. */
 export function loadData(): InterviewData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)

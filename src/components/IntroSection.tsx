@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react'
 import AutoTextarea from './AutoTextarea'
+import FeedbackBox from './FeedbackBox'
 import MemoNote from './MemoNote'
 import { AddButton, DeleteButton, Section } from './ui'
 import type { IntroItem } from '../types'
@@ -46,6 +47,11 @@ const IntroRow = memo(function IntroRow({ item, onPatch, onRemove }: RowProps) {
         onChange={(value) => onPatch(item.id, { value })}
       />
       <div className="char-count">{item.value.length}자</div>
+      <FeedbackBox
+        value={item.feedback}
+        target={item.label || '자기소개 항목'}
+        onChange={(feedback) => onPatch(item.id, { feedback })}
+      />
     </div>
   )
 })

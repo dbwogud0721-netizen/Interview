@@ -6,6 +6,8 @@ export interface IntroItem {
   id: string
   label: string
   value: string
+  /** 다른 사람이 남기는 첨삭. 항목마다 칸 하나. */
+  feedback: string
 }
 
 export interface FollowUpItem {
@@ -21,6 +23,7 @@ export interface QuestionItem {
   followUps: FollowUpItem[]
   /** 아코디언 접힘 상태. 접혀도 DOM에서 제거만 할 뿐 내용은 보존된다. */
   collapsed: boolean
+  feedback: string
 }
 
 export interface TermItem {
@@ -28,6 +31,7 @@ export interface TermItem {
   term: string
   description: string
   category: TermCategory
+  feedback: string
 }
 
 export interface InterviewData {

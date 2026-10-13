@@ -4,19 +4,18 @@ import QuestionSection from './components/QuestionSection'
 import TermSection from './components/TermSection'
 import { ArrowLeft, Download, Trash, Upload } from './components/Icons'
 import { moveItem } from './hooks/useDragReorder'
-import {
-  createInitialData,
-  emptyFollowUp,
-  emptyIntro,
-  emptyQuestion,
-  emptyTerm,
-  loadData,
-  normalize,
-  saveData,
-} from './storage'
-import type { InterviewData, IntroItem, QuestionItem, TermCategory, TermItem } from './types'
+import { createInitialData, emptyFollowUp, emptyIntro, emptyQuestion, emptyTerm, normalize } from './storage'
+import { useSyncedData } from './sync'
+import type { SyncStatus } from './sync'
+import type { IntroItem, QuestionItem, TermCategory, TermItem } from './types'
 
-type SaveState = 'idle' | 'saving' | 'saved'
+const STATUS_LABEL: Record<SyncStatus, string> = {
+  connecting: '연결 중...',
+  saving: '저장 중...',
+  saved: '저장됨',
+  offline: '연결 끊김 · 재시도 중',
+  local: '이 브라우저에만 저장',
+}
 
 const MAIN_TABS = [
   { key: 'intro', label: '1분 자기소개', tone: 'blue' },
@@ -26,33 +25,12 @@ const MAIN_TABS = [
 type MainTabKey = (typeof MAIN_TABS)[number]['key']
 
 export default function App() {
-  const [data, setData] = useState<InterviewData>(() => loadData())
-  const [saveState, setSaveState] = useState<SaveState>('idle')
+  const { data, setData, status } = useSyncedData()
   const [focusKey, setFocusKey] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<MainTabKey>('intro')
   /** 인쇄(PDF 저장) 중에는 선택된 탭만이 아니라 세 탭을 모두 펼쳐서 렌더한다. */
   const [printing, setPrinting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const firstRender = useRef(true)
-
-  // 입력이 멈춘 뒤 잠깐 기다렸다가 저장한다. 타이핑 한 글자마다 직렬화하지 않기 위해서다.
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false
-      return
-    }
-    setSaveState('saving')
-    const timer = window.setTimeout(() => {
-      try {
-        saveData(data)
-        setSaveState('saved')
-      } catch {
-        setSaveState('idle')
-        window.alert('저장 공간이 가득 찼거나 브라우저가 저장을 막고 있어 자동 저장에 실패했습니다.')
-      }
-    }, 400)
-    return () => window.clearTimeout(timer)
-  }, [data])
 
   // PDF 저장은 브라우저 인쇄 기능을 쓴다. 별도 라이브러리 없이 한글 폰트가 그대로 나온다.
   // 세 탭이 모두 DOM에 올라오고 textarea 높이 계산이 끝난 다음 프레임에 인쇄 창을 연다.
@@ -200,7 +178,8 @@ export default function App() {
   }, [])
 
   const resetAll = useCallback(() => {
-    if (!window.confirm('작성한 내용이 모두 지워집니다. 정말 초기화할까요?')) return
+    if (!window.confirm('작성한 내용과 첨삭이 모두 지워집니다. 이 링크로 들어오는 모든 사람에게서 지워져요. 정말 초기화할까요?'))
+      return
     setData(createInitialData())
   }, [])
 
@@ -230,9 +209,9 @@ export default function App() {
               />
             </label>
             <div className="toolbar">
-              <span className={`save-state save-${saveState}`} role="status" aria-live="polite">
+              <span className={`save-state save-${status}`} role="status" aria-live="polite">
                 <span className="save-dot" />
-                {saveState === 'saving' ? '저장 중...' : saveState === 'saved' ? '저장됨' : '자동 저장'}
+                {STATUS_LABEL[status]}
               </span>
               <button type="button" className="ghost-btn" onClick={exportPdf}>
                 <Download />
@@ -321,7 +300,11 @@ export default function App() {
         </main>
 
         <footer className="page-foot">
-          <span>모든 내용은 이 브라우저에만 저장됩니다.</span>
+          <span>
+            {status === 'local'
+              ? '서버 저장소가 아직 연결되지 않아 이 브라우저에만 저장됩니다.'
+              : '이 링크로 들어오는 사람은 모두 같은 내용을 보고 함께 수정할 수 있어요.'}
+          </span>
           <span>Better Me, A Brighter Tomorrow</span>
         </footer>
       </div>
