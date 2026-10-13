@@ -64,17 +64,27 @@ const AutoTextarea = forwardRef<HTMLTextAreaElement, Props>(function AutoTextare
     }
   }, [])
 
+  const classes = className ? `auto-textarea ${className}` : 'auto-textarea'
   return (
-    <textarea
-      ref={setRef}
-      className={className ? `auto-textarea ${className}` : 'auto-textarea'}
-      rows={minRows}
-      value={value}
-      placeholder={placeholder}
-      aria-label={ariaLabel}
-      data-focus-key={focusKey}
-      onChange={(e) => onChange(e.target.value)}
-    />
+    <>
+      <textarea
+        ref={setRef}
+        className={classes}
+        rows={minRows}
+        value={value}
+        placeholder={placeholder}
+        aria-label={ariaLabel}
+        data-focus-key={focusKey}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {/*
+        인쇄용 사본. textarea는 페이지 경계에서 나뉘지 못해 긴 글이 잘리므로,
+        PDF로 저장할 때는 textarea를 숨기고 같은 모양의 일반 텍스트 블록을 대신 보여준다.
+      */}
+      <div className={`${classes} print-text`} aria-hidden="true">
+        {value || '\u00a0'}
+      </div>
+    </>
   )
 })
 
